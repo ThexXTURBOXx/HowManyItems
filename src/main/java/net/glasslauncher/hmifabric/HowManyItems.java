@@ -4,6 +4,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.block.BlockBase;
 import net.modificationstation.stationloader.api.common.event.mod.PostInit;
+import net.modificationstation.stationloader.api.common.event.packet.MessageListenerRegister;
 import net.modificationstation.stationloader.api.common.mod.StationMod;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -19,22 +20,21 @@ import net.minecraft.item.ItemInstance;
 import net.minecraft.packet.AbstractPacket;
 import net.modificationstation.stationloader.api.client.event.option.KeyBindingRegister;
 import net.modificationstation.stationloader.api.common.event.packet.PacketRegister;
-import net.modificationstation.stationloader.api.common.mod.StationMod;
-import net.modificationstation.stationloader.api.common.packet.CustomData;
+import net.modificationstation.stationloader.api.common.packet.Message;
+import net.modificationstation.stationloader.api.common.packet.MessageListenerRegistry;
+import net.modificationstation.stationloader.api.common.registry.Identifier;
+import net.modificationstation.stationloader.api.common.registry.ModID;
 import org.lwjgl.input.Mouse;
 import uk.co.benjiweber.expressions.functions.QuadConsumer;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.logging.Logger;
 
 import static net.glasslauncher.hmifabric.Utils.hiddenItems;
 
-public class HowManyItems implements StationMod, ClientModInitializer, KeyBindingRegister, PacketRegister {
+public class HowManyItems implements StationMod, ClientModInitializer, KeyBindingRegister, MessageListenerRegister {
 
     public static Logger logger = Logger.getLogger(HowManyItems.class.getName());
 
@@ -236,7 +236,7 @@ public class HowManyItems implements StationMod, ClientModInitializer, KeyBindin
     @Override
     public void init() {
         KeyBindingRegister.EVENT.register(this);
-        PacketRegister.EVENT.register(this, getModID());
+        MessageListenerRegister.EVENT.register(this, getModID());
         try {
             fill = Utils.getMethod(DrawableHelper.class, new String[] {"fill", "method_1932"}, new Class<?>[] {int.class, int.class, int.class, int.class, int.class});
         } catch (Exception e) {
@@ -246,13 +246,13 @@ public class HowManyItems implements StationMod, ClientModInitializer, KeyBindin
         thisMod = this;
     }
 
-    public static void handleHandshake(PlayerBase playerBase, CustomData customData) {
+    public static void handleHandshake(PlayerBase playerBase, Message customData) {
         Config.isHMIServer = customData.booleans()[0];
     }
 
     @Override
-    public void registerPackets(QuadConsumer<Integer, Boolean, Boolean, Class<? extends AbstractPacket>> quadConsumer, Map<String, BiConsumer<PlayerBase, CustomData>> map) {
-        map.put("handshake", HowManyItems::handleHandshake);
+    public void registerMessageListeners(MessageListenerRegistry messageListenerRegistry, ModID modID) {
+        messageListenerRegistry.registerValue(Identifier.of("hmifabric:handshake"), HowManyItems::handleHandshake);
     }
 
     @Override
