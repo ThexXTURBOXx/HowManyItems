@@ -16,14 +16,14 @@ public class GuiTextFieldHMI extends Textbox {
 
 	public boolean hovered(int posX, int posY)
     {
-        return field_2421 && posX >= xPos && posX < xPos + width && posY >= yPos && posY < yPos + height;
+        return enabled && posX >= xPos && posX < xPos + width && posY >= yPos && posY < yPos + height;
     }
 
     // onClick
 	@Override
-	public void method_1879(int posX, int posY, int eventButton) {
-        super.method_1879(posX, posY, eventButton);
-        if(this.field_2420 && eventButton == 1) {
+	public void mouseClicked(int posX, int posY, int eventButton) {
+        super.mouseClicked(posX, posY, eventButton);
+        if(this.selected && eventButton == 1) {
         	GuiOverlay.clearSearchBox();
         }
     }

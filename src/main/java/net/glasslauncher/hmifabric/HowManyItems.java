@@ -2,30 +2,30 @@ package net.glasslauncher.hmifabric;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.glasslauncher.hmifabric.tabs.Tab;
+import net.mine_diver.unsafeevents.listener.EventListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.ScreenBase;
 import net.minecraft.client.gui.screen.container.ContainerBase;
-import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.util.ScreenScaler;
 import net.minecraft.item.ItemInstance;
-import net.modificationstation.stationloader.api.client.event.option.KeyBindingRegister;
+import net.modificationstation.stationapi.api.StationAPI;
+import net.modificationstation.stationapi.api.client.event.option.KeyBindingRegisterEvent;
 import org.lwjgl.input.Mouse;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
-public class HowManyItems implements ClientModInitializer, KeyBindingRegister {
+public class HowManyItems implements ClientModInitializer {
 
     public static Logger logger = Logger.getLogger(HowManyItems.class.getName());
 
     private static Method fill;
 
-    @Override
-    public void registerKeyBindings(List<KeyBinding> list) {
-        list.add(Config.toggleOverlay);
+    @EventListener
+    private static void registerKeyBindings(KeyBindingRegisterEvent event) {
+        event.keyBindings.add(Config.toggleOverlay);
     }
 
     /**
@@ -244,7 +244,7 @@ public class HowManyItems implements ClientModInitializer, KeyBindingRegister {
 
     @Override
     public void onInitializeClient() {
-        KeyBindingRegister.EVENT.register(this);
+        StationAPI.EVENT_BUS.register(this);
         try {
             fill = Utils.getMethod(DrawableHelper.class, new String[] {"fill", "method_1932"}, new Class<?>[] {int.class, int.class, int.class, int.class, int.class});
         } catch (Exception e) {

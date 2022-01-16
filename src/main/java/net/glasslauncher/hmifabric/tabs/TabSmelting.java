@@ -30,7 +30,7 @@ public class TabSmelting extends TabWithTexture {
 		
 		fuels.add(new ItemInstance(ItemBase.stick));
 		fuels.add(new ItemInstance(ItemBase.coal));
-		fuels.add(new ItemInstance(ItemBase.bucketLava));
+		fuels.add(new ItemInstance(ItemBase.lavaBucket));
 		fuels.add(new ItemInstance(BlockBase.SAPLING));
 		for(BlockBase block: BlockBase.BY_ID) {
 			if(block != null && (block.material == Material.WOOD /*|| ModLoader.AddAllFuel(block.id) > 0 Not sure how to reimplement in SL*/)
@@ -97,7 +97,7 @@ public class TabSmelting extends TabWithTexture {
             	for (int i = 0; i < recipe.length; i++) {
             		items[j][i] = recipe[i];
             		if (recipe[i] != null && recipe[i].getDamage() == -1) {
-                    	if (recipe[i].method_719()) {
+                    	if (recipe[i].usesMeta()) {
                     		if (filter != null && recipe[i].itemId == filter.itemId) {
                     			items[j][i] = new ItemInstance(recipe[i].getType(), 0, filter.getDamage());
                     		}
@@ -171,7 +171,7 @@ public class TabSmelting extends TabWithTexture {
 			}
 			if(filter == null ||
 					(getUses && input != null && input.itemId == filter.itemId ) ||
-					(!getUses && output.itemId == filter.itemId && (output.getDamage() == filter.getDamage() || output.getDamage() < 0 || !output.method_719())))
+					(!getUses && output.itemId == filter.itemId && (output.getDamage() == filter.getDamage() || output.getDamage() < 0 || !output.usesMeta())))
 			{
 				recipes.add(new ItemInstance[]{output, input});
             }

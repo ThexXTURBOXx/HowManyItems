@@ -7,7 +7,7 @@ import java.util.List;
 import net.fabricmc.api.ClientModInitializer;
 import net.glasslauncher.hmifabric.Utils;
 import net.minecraft.block.BlockBase;
-import net.minecraft.client.ClientInteractionManager;
+import net.minecraft.client.BaseClientInteractionManager;
 import net.minecraft.client.gui.screen.ScreenBase;
 import net.minecraft.client.gui.screen.container.ContainerBase;
 import net.minecraft.client.gui.screen.container.Crafting;
@@ -90,7 +90,7 @@ public class TabCrafting extends TabWithTexture {
                             int i2 = k1 / l;
                             items[j][l1 + i2 * slotsWidth + 1] = aitemstack[k1];
                             if (aitemstack[k1] != null && aitemstack[k1].getDamage() == -1) {
-                            	if (aitemstack[k1].method_719()) {
+                            	if (aitemstack[k1].usesMeta()) {
                             		if (filter != null && aitemstack[k1].itemId == filter.itemId) {
                             			items[j][l1 + i2 * slotsWidth + 1] = new ItemInstance(aitemstack[k1].getType(), 0, filter.getDamage());
                             		}
@@ -114,7 +114,7 @@ public class TabCrafting extends TabWithTexture {
                         	ItemInstance item = (ItemInstance)list.get(j1);
                             items[j][j1 + 1] = item;
                             if (item != null && item.getDamage() == -1) {
-                            	if (item.method_719()) {
+                            	if (item.usesMeta()) {
                             		if (filter != null && item.itemId == filter.itemId) {
                             			items[j][j1 + 1] = new ItemInstance(item.getType(), 0, filter.getDamage());
                             		}
@@ -159,7 +159,7 @@ public class TabCrafting extends TabWithTexture {
     	for(Iterator iterator = recipesComplete.iterator(); iterator.hasNext();)
         {
             Recipe irecipe = (Recipe)iterator.next();
-           if(!getUses && filter.itemId == irecipe.getOutput().itemId && (irecipe.getOutput().getDamage() == filter.getDamage() || irecipe.getOutput().getDamage() < 0 || !irecipe.getOutput().method_719() ))
+           if(!getUses && filter.itemId == irecipe.getOutput().itemId && (irecipe.getOutput().getDamage() == filter.getDamage() || irecipe.getOutput().getDamage() < 0 || !irecipe.getOutput().usesMeta() ))
             //if(itemstack.itemId == irecipe.getOutput().itemId && ( (irecipe.getOutput().getDamage() == itemstack.getDamage() || !irecipe.getOutput().method_719()) )|| irecipe.getOutput().getDamage() < 0)
             {
                 arraylist.add(irecipe);
@@ -176,7 +176,7 @@ public class TabCrafting extends TabWithTexture {
                     for(int i = 0; i < j; i++)
                     {
                         ItemInstance itemstack1 = aitemstack1[i];
-                        if(itemstack1 == null || filter.itemId != itemstack1.itemId || (itemstack1.method_719() && itemstack1.getDamage() != filter.getDamage()) && itemstack1.getDamage() >= 0)
+                        if(itemstack1 == null || filter.itemId != itemstack1.itemId || (itemstack1.usesMeta() && itemstack1.getDamage() != filter.getDamage()) && itemstack1.getDamage() >= 0)
                         {
                             continue;
                         }
@@ -200,7 +200,7 @@ public class TabCrafting extends TabWithTexture {
                     {
                         Object obj = iterator1.next();
                         ItemInstance itemstack2 = (ItemInstance)obj;
-                        if(filter.itemId == itemstack2.itemId && (itemstack2.getDamage() == filter.getDamage() || itemstack2.getDamage() < 0 || !itemstack2.method_719()))
+                        if(filter.itemId == itemstack2.itemId && (itemstack2.getDamage() == filter.getDamage() || itemstack2.getDamage() < 0 || !itemstack2.usesMeta()))
                         {
                             arraylist.add(irecipe);
                             break;
@@ -264,7 +264,7 @@ public class TabCrafting extends TabWithTexture {
         	}
         	
         	for (ItemInstance slot : aslot) {
-        		if (slot != null && slot.count > 0 && slot.itemId == item.itemId && (slot.getDamage() == item.getDamage() || item.getDamage() < 0 || !item.method_719())) {
+        		if (slot != null && slot.count > 0 && slot.itemId == item.itemId && (slot.getDamage() == item.getDamage() || item.getDamage() < 0 || !item.usesMeta())) {
         			slot.count -= 1;
         			itemsInInv[i - 1] = true;
         			continue recipe;
@@ -296,19 +296,19 @@ public class TabCrafting extends TabWithTexture {
         	}
         	int count = 0;
         	for (ItemInstance slot : aslot) {
-        		if (slot != null && slot.count > 0 && slot.itemId == item.itemId && (slot.getDamage() == item.getDamage() || item.getDamage() < 0 || !item.method_719())) {
+        		if (slot != null && slot.count > 0 && slot.itemId == item.itemId && (slot.getDamage() == item.getDamage() || item.getDamage() < 0 || !item.usesMeta())) {
         			count += slot.count;
         			slot.count = 0;
         		}
         	}
         	int prevEqualItemCount = 1;
         	for (int j = 1; j < i; j++) {
-                if(recipeItems[j] != null && recipeItems[j].isEqualIgnoreFlags(item)) {
+                if(recipeItems[j] != null && recipeItems[j].isDamageAndIDIdentical(item)) {
                    	prevEqualItemCount++;
                 }
             }
         	for (int j = 1; j < recipeItems.length; j++) {
-                if(recipeItems[j] != null && recipeItems[j].isEqualIgnoreFlags(item)) {
+                if(recipeItems[j] != null && recipeItems[j].isDamageAndIDIdentical(item)) {
                 	itemStackSize[j - 1] = count / prevEqualItemCount;
                 }
             }
@@ -316,9 +316,9 @@ public class TabCrafting extends TabWithTexture {
         int finalItemStackSize = -1;
         for (int i = 0; i < itemStackSize.length; i++) {
         	ItemInstance item = recipeItems[i + 1];
-        	if(itemStackSize[i] == -1 || item.method_709() == 1) continue;
-        	if(finalItemStackSize == -1 || itemStackSize[i] < finalItemStackSize || finalItemStackSize > item.method_709()) {
-        		finalItemStackSize = Math.min(itemStackSize[i], item.method_709());
+        	if(itemStackSize[i] == -1 || item.getMaxStackSize() == 1) continue;
+        	if(finalItemStackSize == -1 || itemStackSize[i] < finalItemStackSize || finalItemStackSize > item.getMaxStackSize()) {
+        		finalItemStackSize = Math.min(itemStackSize[i], item.getMaxStackSize());
         	}
     	}
         if(finalItemStackSize > 0) return finalItemStackSize;
@@ -383,10 +383,10 @@ public class TabCrafting extends TabWithTexture {
         	}
         	
         	//locate correct item and put in recipe slot
-        	while(!recipeSlot.hasItem() || (recipeSlot.getItem().count < recipeStackSize && recipeSlot.getItem().method_709() > 1))
+        	while(!recipeSlot.hasItem() || (recipeSlot.getItem().count < recipeStackSize && recipeSlot.getItem().getMaxStackSize() > 1))
         	for (int inventorySlotIndex = recipeSlotIndex + 1; inventorySlotIndex < inventorySlots.size(); inventorySlotIndex++) {
         		Slot inventorySlot = (Slot)inventorySlots.get(inventorySlotIndex);
-        		if (inventorySlot.hasItem() && inventorySlot.getItem().itemId == item.itemId && (inventorySlot.getItem().getDamage() == item.getDamage() || item.getDamage() < 0 || !item.method_719())) {
+        		if (inventorySlot.hasItem() && inventorySlot.getItem().itemId == item.itemId && (inventorySlot.getItem().getDamage() == item.getDamage() || item.getDamage() < 0 || !item.usesMeta())) {
         			this.clickSlot(inventorySlotIndex, true, false);
         			if (isInv(parent) && recipeSlotIndex > 3) {
         				this.clickSlot(recipeSlotIndex - 1, false, false);
@@ -402,12 +402,12 @@ public class TabCrafting extends TabWithTexture {
 		
 	}
 	
-	ClientInteractionManager inv;
+	BaseClientInteractionManager inv;
 	AbstractClientPlayer player;
 	int windowId;
 	
 	void clickSlot(int slotIndex, boolean leftClick, boolean shiftClick) {
-		inv.method_1708(windowId, slotIndex, leftClick ? 0 : 1, shiftClick, player);
+		inv.clickSlot(windowId, slotIndex, leftClick ? 0 : 1, shiftClick, player);
 	}
 	
 	boolean isInv(ScreenBase screen) {

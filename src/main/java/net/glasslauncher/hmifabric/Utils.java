@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 import net.fabricmc.loader.api.FabricLoader;
@@ -35,6 +36,7 @@ public class Utils {
 	public static ItemRenderer itemRenderer = new ItemRenderer();
 	public static Random rand = new Random();
 	public static DrawableHelper gui = new DrawableHelper();
+	@SuppressWarnings("deprecation")
 	public static Minecraft getMC() { return (Minecraft) FabricLoader.getInstance().getGameInstance();}
 	
 	private static final List<String> loadedResources = new ArrayList<>();
@@ -43,10 +45,10 @@ public class Utils {
 	
 	//clean mine_diver code
 	//Used for easy reflection with obfuscated or regular fields
-	public static final Field getField(Class<?> target, String names[]) {
+	public static Field getField(Class<?> target, String names[]) {
 		for (Field field : target.getDeclaredFields()) {
 			for (String name : names) {
-				if (field.getName() == name) {
+				if (field.getName().equals(name)) {
 					field.setAccessible(true);
 					return field;
 				}
@@ -57,7 +59,7 @@ public class Utils {
 	
 	//clean mine_diver code
 	//Used for easy reflection with obfuscated or regular methods
-	public static final Method getMethod(Class<?> target, String names[], Class<?> types[]) {
+	public static Method getMethod(Class<?> target, String names[], Class<?> types[]) {
 		for (String name : names) {
 			try {
 				Method method = target.getDeclaredMethod(name, types);
@@ -78,7 +80,7 @@ public class Utils {
 		}
 		if(Config.showItemIDs && withID) {
 			s += " " + item.itemId;
-			if(item.method_719()) s+= ":" + item.getDamage();
+			if(item.usesMeta()) s+= ":" + item.getDamage();
 		}
 		return s;
 	}
@@ -116,7 +118,7 @@ public class Utils {
 	            {
 	                ItemInstance itemstack = new ItemInstance(item, 1, dmg);
 	                for(ItemInstance hiddenItem : GuiOverlay.hiddenItems) {
-	                	if(itemstack.isEqualIgnoreFlags(hiddenItem)) {
+	                	if(itemstack.isDamageAndIDIdentical(hiddenItem)) {
 	                		itemstack = hiddenItem;
 	                		break;
 	                	}
@@ -154,12 +156,12 @@ public class Utils {
 	            if(irecipe != null && irecipe.getOutput() != null && irecipe.getOutput().getType() != null) {
 	            	ItemInstance itemstack = new ItemInstance(irecipe.getOutput().getType(), 1, irecipe.getOutput().getDamage());
 	                for(ItemInstance hiddenItem : GuiOverlay.hiddenItems) {
-	                	if(itemstack.isEqualIgnoreFlags(hiddenItem)) {
+	                	if(itemstack.isDamageAndIDIdentical(hiddenItem)) {
 	                		itemstack = hiddenItem;
 	                		break;
 	                	}
 	                }
-		            if(!itemstack.method_719()) {
+		            if(!itemstack.usesMeta()) {
 		            	continue recipeLoop;
 		            }
 		            addItemInOrder(allItems, itemstack);
@@ -173,7 +175,7 @@ public class Utils {
 	
 	public static void addItemInOrder(ArrayList<ItemInstance> itemList, ItemInstance itemstack) {
 		for(ItemInstance item : itemList) {
-			if(item.isEqualIgnoreFlags(itemstack)) {
+			if(item.isDamageAndIDIdentical(itemstack)) {
         		return;
         	}
         	if(item.itemId > itemstack.itemId || (item.itemId == itemstack.itemId && item.getDamage() > itemstack.getDamage())) {
@@ -199,12 +201,12 @@ public class Utils {
 		hiddenItems.add(new ItemInstance(BlockBase.FARMLAND));
 		hiddenItems.add(new ItemInstance(BlockBase.FURNACE_LIT));
 		hiddenItems.add(new ItemInstance(BlockBase.STANDING_SIGN));
-		hiddenItems.add(new ItemInstance(BlockBase.DOOR_WOOD));
+		hiddenItems.add(new ItemInstance(BlockBase.WOOD_DOOR));
 		hiddenItems.add(new ItemInstance(BlockBase.WALL_SIGN));
-		hiddenItems.add(new ItemInstance(BlockBase.DOOR_IRON));
+		hiddenItems.add(new ItemInstance(BlockBase.IRON_DOOR));
 		hiddenItems.add(new ItemInstance(BlockBase.REDSTONE_ORE_LIT));
 		hiddenItems.add(new ItemInstance(BlockBase.REDSTONE_TORCH));
-		hiddenItems.add(new ItemInstance(BlockBase.REEDS));
+		hiddenItems.add(new ItemInstance(BlockBase.SUGAR_CANES));
 		hiddenItems.add(new ItemInstance(BlockBase.CAKE));
 		hiddenItems.add(new ItemInstance(BlockBase.REDSTONE_REPEATER));
 		hiddenItems.add(new ItemInstance(BlockBase.REDSTONE_REPEATER_LIT));
@@ -397,7 +399,7 @@ public class Utils {
 	public static void logError(String... lines) {
 		System.out.println("HMI ERROR: " + lines[0]);
 		for (String message : lines) {
-			if(message == lines[0]) continue;
+			if(Objects.equals(message, lines[0])) continue;
 			System.out.println('\t' + message);
 		}
 	}
@@ -458,7 +460,7 @@ public class Utils {
 		public EasyField(Class<?> target, String... names) {
 			for (Field field : target.getDeclaredFields()) {
 				for (String name : names) {
-					if (field.getName() == name) {
+					if (field.getName().equals(name)) {
 						field.setAccessible(true);
 						this.field = field;
 						return;

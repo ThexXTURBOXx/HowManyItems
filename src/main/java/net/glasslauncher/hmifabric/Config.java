@@ -48,7 +48,7 @@ public class Config {
 				if(i > 0) configWriter.write(",");
 				ItemInstance item = hiddenItems.get(i);
 				configWriter.write(String.valueOf(item.itemId));
-				if(item.method_719()) {
+				if(item.usesMeta()) {
 					configWriter.write(":" + String.valueOf(item.getDamage()));
 					int meta = item.getDamage();
 					for(int q = i + 1; q < hiddenItems.size() && hiddenItems.get(q).itemId == item.itemId; q++) {

@@ -63,7 +63,7 @@ public class GuiControlsHMI extends ScreenBase {
         	if(binds[buttonId] == Config.toggleOverlay) {
         		for (int j = 0; j < minecraft.options.keyBindings.length; j++) {
         			if(minecraft.options.keyBindings[j] == Config.toggleOverlay) {
-        				minecraft.options.method_1226(j, i);
+        				minecraft.options.setControl(j, i);
         				break;
         			}
         		}

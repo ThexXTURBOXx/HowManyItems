@@ -74,7 +74,7 @@ public class TabGenericBlock extends Tab{
             	for (int i = 0; i < recipe.length; i++) {
             		items[j][i] = recipe[i];
             		if (recipe[i] != null && recipe[i].getDamage() == -1) {
-                    	if (recipe[i].method_719()) {
+                    	if (recipe[i].usesMeta()) {
                     		if (filter != null && recipe[i].itemId == filter.itemId) {
                     			items[j][i] = new ItemInstance(recipe[i].getType(), 0, filter.getDamage());
                     		}
@@ -127,7 +127,7 @@ public class TabGenericBlock extends Tab{
 			}
 			else if (getUses) {
 				for(int i = 0; i < inputs.length; i++) {
-					if(inputs[i].itemId == filter.itemId && (inputs[i].getDamage() == filter.getDamage() || inputs[i].getDamage() < 0 || !inputs[i].method_719())) {
+					if(inputs[i].itemId == filter.itemId && (inputs[i].getDamage() == filter.getDamage() || inputs[i].getDamage() < 0 || !inputs[i].usesMeta())) {
 						addRecipe = true;
 						break;
 					}
@@ -135,7 +135,7 @@ public class TabGenericBlock extends Tab{
 			}
 			else {
 				for(int i = 0; i < outputs.length; i++) {
-					if(outputs[i].itemId == filter.itemId && (outputs[i].getDamage() == filter.getDamage() || outputs[i].getDamage() < 0 || !outputs[i].method_719())) {
+					if(outputs[i].itemId == filter.itemId && (outputs[i].getDamage() == filter.getDamage() || outputs[i].getDamage() < 0 || !outputs[i].usesMeta())) {
 						addRecipe = true;
 						break;
 					}

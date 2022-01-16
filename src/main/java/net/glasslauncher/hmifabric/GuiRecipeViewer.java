@@ -24,7 +24,7 @@ import org.lwjgl.input.Mouse;
 
 public class GuiRecipeViewer extends ContainerBase
 {
-	private static Field xSizeField = Utils.getField(ContainerBase.class, new String[] {"containerWidth", "a"});
+	private static Field xSizeField = Utils.getField(ContainerBase.class, new String[] {"field_1152", "containerWidth", "a"});
 
 	public GuiRecipeViewer(ItemInstance itemstack, Boolean getUses, ScreenBase parent)
     {
@@ -77,7 +77,7 @@ public class GuiRecipeViewer extends ContainerBase
 		for (Tab tab : HowManyItems.getTabs()) {
 			boolean tabMatchesBlock = false;
 			for(ItemInstance tabBlock : tab.equivalentCraftingStations) {
-				if(tabBlock.isEqualIgnoreFlags(itemstack)) {
+				if(tabBlock.isDamageAndIDIdentical(itemstack)) {
 					tabMatchesBlock = true;
 					tab.updateRecipes(null, false);
 					break;
@@ -97,7 +97,7 @@ public class GuiRecipeViewer extends ContainerBase
 		}
 		if(inv.filter.isEmpty() || getUses != inv.prevGetUses.peek() ||
 				(itemstack == null && inv.filter.peek() != null) || (itemstack != null && inv.filter.peek() == null) ||
-				(itemstack.itemId != inv.filter.peek().itemId || (itemstack.getDamage() != inv.filter.peek().getDamage() && itemstack.method_719())))
+				(itemstack.itemId != inv.filter.peek().itemId || (itemstack.getDamage() != inv.filter.peek().getDamage() && itemstack.usesMeta())))
     	{
 
     		inv.newList = true;
