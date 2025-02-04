@@ -4,12 +4,12 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.glasslauncher.hmifabric.event.HMIItemListRefreshEvent;
 import net.glasslauncher.hmifabric.mixin.access.ContainerBaseAccessor;
 import net.glasslauncher.hmifabric.tabs.Tab;
-import net.minecraft.class_583;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.container.ContainerScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.item.ItemRenderer;
+import net.minecraft.client.render.platform.Lighting;
 import net.minecraft.client.resource.language.TranslationStorage;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -47,7 +47,7 @@ public class Utils {
         }
         if (Config.config.showItemIDs && withID) {
             s += " " + item.itemId;
-            if (item.method_719()) s += ":" + item.getDamage();
+            if (item.hasSubtypes()) s += ":" + item.getDamage();
         }
         return s;
     }
@@ -58,7 +58,7 @@ public class Utils {
     }
 
     //Returns the item that the user is hovering in their inventory
-    public static ItemStack hoveredItem(ContainerScreen gui, int posX, int posY) {
+    public static ItemStack hoveredItem(HandledScreen gui, int posX, int posY) {
         try {
             Slot slotAtPosition = ((ContainerBaseAccessor) gui).invokeGetSlot(posX, posY);
             if (slotAtPosition != null) return slotAtPosition.getStack();
@@ -89,7 +89,7 @@ public class Utils {
                         }
                     }
                     try {
-                        int l = item.method_439(itemstack);
+                        int l = item.getTextureId(itemstack);
                         String s = TranslationStorage.getInstance().getClientTranslation(itemstack.getTranslationKey());
                         if (s.length() == 0) s = itemstack.getTranslationKey() + "@" + l;
                         if (dmg >= 4 && (s.contains(String.valueOf(dmg)) || s.contains(String.valueOf(dmg + 1)) || s.contains(String.valueOf(dmg - 1)))) {
@@ -122,7 +122,7 @@ public class Utils {
                             break;
                         }
                     }
-                    if (!itemstack.method_719()) {
+                    if (!itemstack.hasSubtypes()) {
                         continue;
                     }
                     addItemInOrder(allItems, itemstack);
@@ -243,9 +243,9 @@ public class Utils {
     public static void drawItemStack(int x, int y, ItemStack item, boolean drawOverlay) {
         localTextureBound = false;
         enableItemLighting();
-        itemRenderer.method_1487(getMC().textRenderer, getMC().textureManager, item, x, y);
+        itemRenderer.renderGuiItem(getMC().textRenderer, getMC().textureManager, item, x, y);
         if (drawOverlay) {
-            itemRenderer.method_1488(getMC().textRenderer, getMC().textureManager, item, x, y);
+            itemRenderer.renderGuiItemDecoration(getMC().textRenderer, getMC().textureManager, item, x, y);
         }
     }
 
@@ -255,7 +255,7 @@ public class Utils {
             GL11.glEnable(32826 /*GL_RESCALE_NORMAL_EXT*/);
             GL11.glPushMatrix();
             GL11.glRotatef(120F, 1.0F, 0.0F, 0.0F);
-            class_583.method_1930();
+            Lighting.turnOn();
             GL11.glPopMatrix();
             itemLighting = true;
         }
@@ -284,7 +284,7 @@ public class Utils {
 
     public static void postRender() {
         lighting = null;
-        class_583.method_1927();
+        Lighting.turnOff();
         enableLighting();
     }
 

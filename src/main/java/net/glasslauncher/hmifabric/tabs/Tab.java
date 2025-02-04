@@ -1,6 +1,6 @@
 package net.glasslauncher.hmifabric.tabs;
 
-import net.minecraft.client.gui.screen.container.ContainerScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.resource.language.TranslationStorage;
 import net.minecraft.item.ItemStack;
 import net.modificationstation.stationapi.api.util.Namespace;
@@ -43,7 +43,7 @@ public abstract class Tab {
         return TranslationStorage.getInstance().getClientTranslation(getTabItem().getTranslationKey());
     }
 
-    public abstract Class<? extends ContainerScreen> getGuiClass();
+    public abstract Class<? extends HandledScreen> getGuiClass();
 
     public ArrayList<ItemStack> equivalentCraftingStations = new ArrayList<>();
 

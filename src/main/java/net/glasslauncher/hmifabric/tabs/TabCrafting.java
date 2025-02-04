@@ -2,13 +2,13 @@ package net.glasslauncher.hmifabric.tabs;
 
 import net.glasslauncher.hmifabric.Utils;
 import net.minecraft.block.Block;
-import net.minecraft.class_516;
-import net.minecraft.class_564;
-import net.minecraft.class_585;
 import net.minecraft.client.InteractionManager;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.container.ContainerScreen;
+import net.minecraft.client.gui.screen.ingame.CraftingScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.util.ScreenScaler;
 import net.minecraft.entity.player.ClientPlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
@@ -16,7 +16,6 @@ import net.minecraft.recipe.CraftingRecipe;
 import net.minecraft.recipe.CraftingRecipeManager;
 import net.minecraft.recipe.ShapelessRecipe;
 import net.minecraft.screen.slot.Slot;
-import net.modificationstation.stationapi.api.recipe.StationRecipe;
 import net.modificationstation.stationapi.api.util.Namespace;
 import org.lwjgl.input.Keyboard;
 
@@ -28,7 +27,7 @@ public class TabCrafting extends TabWithTexture {
     protected List<Object> recipes;
     private final Block tabBlock;
     private boolean isVanillaWorkbench = false; //THIS IS LAZY
-    public ArrayList<Class<? extends ContainerScreen>> guiCraftingStations = new ArrayList<>();
+    public ArrayList<Class<? extends HandledScreen>> guiCraftingStations = new ArrayList<>();
     public int recipeIndex;
 
     public TabCrafting(Namespace tabCreator) {
@@ -41,7 +40,7 @@ public class TabCrafting extends TabWithTexture {
             }
         }
         isVanillaWorkbench = true;
-        guiCraftingStations.add(class_516.class);
+        guiCraftingStations.add(CraftingScreen.class);
     }
 
     public TabCrafting(Namespace tabCreator, List<Object> recipesComplete, Block tabBlock) {
@@ -82,8 +81,8 @@ public class TabCrafting extends TabWithTexture {
     }
 
     @Override
-    public Class<? extends ContainerScreen> getGuiClass() {
-        return class_516.class;
+    public Class<? extends HandledScreen> getGuiClass() {
+        return CraftingScreen.class;
     }
 
     @Override
@@ -96,7 +95,7 @@ public class TabCrafting extends TabWithTexture {
             if (k < recipes.size()) {
                 try {
                     Object recipeObj = recipes.get(k);
-                    if (recipeObj instanceof StationRecipe) {
+                    /*if (recipeObj instanceof StationRecipe) {
                         StationRecipe recipe = (StationRecipe) recipes.get(k);
                         ItemStack[] list = recipe.getIngredients();
                         ItemStack[] outputArray = recipe.getOutputs();
@@ -105,7 +104,7 @@ public class TabCrafting extends TabWithTexture {
                             ItemStack item = list[j1];
                             items[j][j1 + 1] = item;
                             if (item != null && item.getDamage() == -1) {
-                                if (item.method_719()) {
+                                if (item.hasSubtypes()) {
                                     if (filter != null && item.itemId == filter.itemId) {
                                         items[j][j1 + 1] = new ItemStack(item.getItem(), 0, filter.getDamage());
                                     } else {
@@ -117,7 +116,7 @@ public class TabCrafting extends TabWithTexture {
                             }
                         }
 
-                    }
+                    }*/
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
                 }
@@ -144,17 +143,17 @@ public class TabCrafting extends TabWithTexture {
             recipes = recipesComplete;
         } else {
             for (Object o : recipesComplete) {
-                if (o instanceof StationRecipe) {
+                /*if (o instanceof StationRecipe) {
                     StationRecipe recipe = (StationRecipe) o;
                     if (!getUses) {
-                        if (Arrays.stream(recipe.getOutputs()).anyMatch(itemInstance -> filter.itemId == itemInstance.itemId && (itemInstance.getDamage() == filter.getDamage() || itemInstance.getDamage() < 0 || !itemInstance.method_719()))) {
+                        if (Arrays.stream(recipe.getOutputs()).anyMatch(itemInstance -> filter.itemId == itemInstance.itemId && (itemInstance.getDamage() == filter.getDamage() || itemInstance.getDamage() < 0 || !itemInstance.hasSubtypes()))) {
                             arraylist.add(o);
                         }
                     } else {
                         try {
                             ItemStack[] aitemstack = recipe.getIngredients();
                             for (ItemStack itemstack1 : aitemstack) {
-                                if (itemstack1 == null || filter.itemId != itemstack1.itemId || (itemstack1.method_719() && itemstack1.getDamage() != filter.getDamage()) && itemstack1.getDamage() >= 0) {
+                                if (itemstack1 == null || filter.itemId != itemstack1.itemId || (itemstack1.hasSubtypes() && itemstack1.getDamage() != filter.getDamage()) && itemstack1.getDamage() >= 0) {
                                     continue;
                                 }
                                 arraylist.add(o);
@@ -165,7 +164,7 @@ public class TabCrafting extends TabWithTexture {
                             exception.printStackTrace();
                         }
                     }
-                }
+                }*/
             }
             recipes = arraylist;
         }
@@ -181,7 +180,7 @@ public class TabCrafting extends TabWithTexture {
 
     @Override
     public Boolean drawSetupRecipeButton(Screen parent, ItemStack[] recipeItems) {
-        for (Class<? extends ContainerScreen> gui : guiCraftingStations) {
+        for (Class<? extends HandledScreen> gui : guiCraftingStations) {
             if (gui.isInstance(parent)) return true;
         }
         if (isVanillaWorkbench && (parent == null || isInv(parent))) {
@@ -198,12 +197,12 @@ public class TabCrafting extends TabWithTexture {
     public Boolean[] itemsInInventory(Screen parent, ItemStack[] recipeItems) {
         Boolean[] itemsInInv = new Boolean[slots.length - 1];
         List<Object> list;
-        if (parent instanceof ContainerScreen)
+        if (parent instanceof HandledScreen)
             //noinspection unchecked
-            list = ((ContainerScreen) parent).container.slots;
+            list = ((HandledScreen) parent).container.slots;
         else
             //noinspection unchecked
-            list = Utils.getMC().player.container.slots;
+            list = Utils.getMC().player.currentScreenHandler.slots;
         ItemStack[] aslot = new ItemStack[list.size()];
         for (int i = 0; i < list.size(); i++) {
             if (((Slot) list.get(i)).hasStack())
@@ -220,7 +219,7 @@ public class TabCrafting extends TabWithTexture {
             }
 
             for (ItemStack slot : aslot) {
-                if (slot != null && slot.count > 0 && slot.itemId == item.itemId && (slot.getDamage() == item.getDamage() || item.getDamage() < 0 || !item.method_719())) {
+                if (slot != null && slot.count > 0 && slot.itemId == item.itemId && (slot.getDamage() == item.getDamage() || item.getDamage() < 0 || !item.hasSubtypes())) {
                     slot.count -= 1;
                     itemsInInv[i - 1] = true;
                     continue recipe;
@@ -251,7 +250,7 @@ public class TabCrafting extends TabWithTexture {
             }
             int count = 0;
             for (ItemStack slot : aslot) {
-                if (slot != null && slot.count > 0 && slot.itemId == item.itemId && (slot.getDamage() == item.getDamage() || item.getDamage() < 0 || !item.method_719())) {
+                if (slot != null && slot.count > 0 && slot.itemId == item.itemId && (slot.getDamage() == item.getDamage() || item.getDamage() < 0 || !item.hasSubtypes())) {
                     count += slot.count;
                     slot.count = 0;
                 }
@@ -283,16 +282,16 @@ public class TabCrafting extends TabWithTexture {
     @Override
     public void setupRecipe(Screen parent, ItemStack[] recipeItems) {
         if (parent == null) {
-            Utils.getMC().method_2134();
-            class_564 scaledresolution = new class_564(Utils.getMC().options, Utils.getMC().displayWidth, Utils.getMC().displayHeight);
-            int i = scaledresolution.method_1857();
-            int j = scaledresolution.method_1858();
-            parent = new class_585(Utils.getMC().player);
+            Utils.getMC().unlockMouse();
+            ScreenScaler scaledresolution = new ScreenScaler(Utils.getMC().options, Utils.getMC().displayWidth, Utils.getMC().displayHeight);
+            int i = scaledresolution.getScaledWidth();
+            int j = scaledresolution.getScaledHeight();
+            parent = new InventoryScreen(Utils.getMC().player);
             Utils.getMC().currentScreen = parent;
             parent.init(Utils.getMC(), i, j);
-            Utils.getMC().field_2821 = false;
+            Utils.getMC().skipGameRender = false;
         }
-        ContainerScreen container = ((ContainerScreen) parent);
+        HandledScreen container = ((HandledScreen) parent);
         //noinspection unchecked
         List<Object> inventorySlots = container.container.slots;
 
@@ -343,7 +342,7 @@ public class TabCrafting extends TabWithTexture {
             while (!recipeSlot.hasStack() || (recipeSlot.getStack().count < recipeStackSize && recipeSlot.getStack().getMaxCount() > 1))
                 for (int inventorySlotIndex = recipeSlotIndex + 1; inventorySlotIndex < inventorySlots.size(); inventorySlotIndex++) {
                     Slot inventorySlot = (Slot) inventorySlots.get(inventorySlotIndex);
-                    if (inventorySlot.hasStack() && inventorySlot.getStack().itemId == item.itemId && (inventorySlot.getStack().getDamage() == item.getDamage() || item.getDamage() < 0 || !item.method_719())) {
+                    if (inventorySlot.hasStack() && inventorySlot.getStack().itemId == item.itemId && (inventorySlot.getStack().getDamage() == item.getDamage() || item.getDamage() < 0 || !item.hasSubtypes())) {
                         this.clickSlot(inventorySlotIndex, true, false);
                         if (isInv(parent) && recipeSlotIndex > 3) {
                             this.clickSlot(recipeSlotIndex - 1, false, false);

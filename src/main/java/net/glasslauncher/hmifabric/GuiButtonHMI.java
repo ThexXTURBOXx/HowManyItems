@@ -36,12 +36,12 @@ public class GuiButtonHMI extends ButtonWidget {
         Utils.bindTexture("/gui/gui.png");
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         boolean isHovered = i >= x && j >= y && i < x + width && j < y + height;
-        int k = method_1187(isHovered);
+        int k = getYImage(isHovered);
         drawTexture(x, y, 0, 46 + k * 20, width / 2, height);
         drawTexture(x + width / 2, y, 200 - width / 2, 46 + k * 20, width / 2, height / 2);
         drawTexture(x, y + height / 2, 0, 46 + k * 20 + 20 - height / 2, width / 2, height / 2);
         drawTexture(x + width / 2, y + height / 2, 200 - width / 2, 46 + k * 20 + 20 - height / 2, width / 2, height / 2);
-        method_1188(minecraft, i, j);
+        renderBackground(minecraft, i, j);
         if (item != null && (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT))) {
             Utils.drawItemStack(x + 2, y + 2, item, true);
         } else if (iconIndex < 0) {

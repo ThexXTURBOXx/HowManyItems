@@ -3,11 +3,11 @@ package net.glasslauncher.hmifabric;
 import net.glasslauncher.hmifabric.mixin.access.ContainerBaseAccessor;
 import net.glasslauncher.hmifabric.tabs.Tab;
 import net.glasslauncher.hmifabric.tabs.TabWithTexture;
-import net.minecraft.class_564;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.container.ContainerScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.OptionButtonWidget;
+import net.minecraft.client.util.ScreenScaler;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -15,7 +15,7 @@ import org.lwjgl.input.Mouse;
 import java.util.*;
 
 
-public class GuiRecipeViewer extends ContainerScreen {
+public class GuiRecipeViewer extends HandledScreen {
     public GuiRecipeViewer(ItemStack itemstack, Boolean getUses, Screen parent) {
         super(container = new ContainerRecipeViewer(inv = new InventoryRecipeViewer(itemstack)));
         this.parent = parent;
@@ -35,7 +35,7 @@ public class GuiRecipeViewer extends ContainerScreen {
             backgroundWidth = Config.config.recipeViewerGuiWidth;
             backgroundHeight = Config.config.recipeViewerGuiHeight;
         } else {
-            if (parent instanceof ContainerScreen) {
+            if (parent instanceof HandledScreen) {
                 try {
                     backgroundWidth = ((ContainerBaseAccessor) parent).getContainerWidth();
                 } catch (Exception e) {
@@ -84,7 +84,7 @@ public class GuiRecipeViewer extends ContainerScreen {
         }
         if (inv.filter.isEmpty() || getUses != inv.prevGetUses.peek() ||
                 (itemstack == null && inv.filter.peek() != null) || (itemstack != null && inv.filter.peek() == null) ||
-                (itemstack.itemId != inv.filter.peek().itemId || (itemstack.getDamage() != inv.filter.peek().getDamage() && itemstack.method_719()))) {
+                (itemstack.itemId != inv.filter.peek().itemId || (itemstack.getDamage() != inv.filter.peek().getDamage() && itemstack.hasSubtypes()))) {
 
             inv.newList = true;
             if (itemstack == null) {
@@ -263,7 +263,7 @@ public class GuiRecipeViewer extends ContainerScreen {
         }
         if (i == Keyboard.KEY_ESCAPE || i == minecraft.options.inventoryKey.code) {
             displayParent();
-            if (i == minecraft.options.inventoryKey.code) minecraft.player.closeScreen();
+            if (i == minecraft.options.inventoryKey.code) minecraft.player.closeHandledScreen();
         } else
             super.keyPressed(c, i);
     }
@@ -355,15 +355,15 @@ public class GuiRecipeViewer extends ContainerScreen {
     public void displayParent() {
         //if (parent instanceof GuiInventory) {
         minecraft = Utils.getMC();
-        minecraft.player.container = minecraft.player.playerContainer;
+        minecraft.player.currentScreenHandler = minecraft.player.playerScreenHandler;
         //}
         this.removed();
         if (parent != null) {
             minecraft.currentScreen = parent;
-            class_564 scaledresolution = new class_564(minecraft.options, minecraft.displayWidth, minecraft.displayHeight);
-            int i = scaledresolution.method_1857();
-            int j = scaledresolution.method_1858();
-            minecraft.method_2134();
+            ScreenScaler scaledresolution = new ScreenScaler(minecraft.options, minecraft.displayWidth, minecraft.displayHeight);
+            int i = scaledresolution.getScaledWidth();
+            int j = scaledresolution.getScaledHeight();
+            minecraft.unlockMouse();
             parent.init(minecraft, i, j);
         } else {
             minecraft.setScreen(parent);

@@ -1,8 +1,8 @@
 package net.glasslauncher.hmifabric.tabs;
 
 import net.minecraft.block.Block;
-import net.minecraft.class_524;
-import net.minecraft.client.gui.screen.container.ContainerScreen;
+import net.minecraft.client.gui.screen.ingame.FurnaceScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.SmeltingRecipeManager;
@@ -83,7 +83,7 @@ public class TabSmelting extends TabWithTexture {
                         int offset = i+1;
                         items[j][offset] = recipe[i];
                         if (recipe[i] != null && recipe[i].getDamage() == -1) {
-                            if (recipe[i].method_719()) {
+                            if (recipe[i].hasSubtypes()) {
                                 if (filter != null && recipe[i].itemId == filter.itemId) {
                                     items[j][offset] = new ItemStack(recipe[i].getItem(), 0, filter.getDamage());
                                 } else {
@@ -103,7 +103,7 @@ public class TabSmelting extends TabWithTexture {
                         ItemStack displayItem = new ItemStack(theHolyOneLiner);
                         items[j][offset] = displayItem;
                         if (recipe[i] != null && displayItem.getDamage() == -1) {
-                            if (displayItem.method_719()) {
+                            if (displayItem.hasSubtypes()) {
                                 if (filter != null && displayItem.itemId == filter.itemId) {
                                     items[j][offset] = new ItemStack(displayItem.getItem(), 0, filter.getDamage());
                                 } else {
@@ -140,8 +140,8 @@ public class TabSmelting extends TabWithTexture {
     }
 
     @Override
-    public Class<? extends ContainerScreen> getGuiClass() {
-        return class_524.class;
+    public Class<? extends HandledScreen> getGuiClass() {
+        return FurnaceScreen.class;
     }
 
     public void updateRecipesWithoutClear(ItemStack filter, Boolean getUses) {
@@ -186,7 +186,7 @@ public class TabSmelting extends TabWithTexture {
                     input = obj;
                 } else throw new ClassCastException("Invalid recipe item type " + obj.getClass().getName() + "!");
             }
-            if (input != null && (filter == null || (getUses && Arrays.stream(((ItemStack[]) input)).allMatch((inp) -> inp.itemId == filter.itemId)) || (!getUses && output.itemId == filter.itemId && (output.getDamage() == filter.getDamage() || output.getDamage() < 0 || !output.method_719())))) {
+            if (input != null && (filter == null || (getUses && Arrays.stream(((ItemStack[]) input)).allMatch((inp) -> inp.itemId == filter.itemId)) || (!getUses && output.itemId == filter.itemId && (output.getDamage() == filter.getDamage() || output.getDamage() < 0 || !output.hasSubtypes())))) {
                 recipes.add(new Object[]{output, input});
             } else if (filter == null) throw new ClassCastException("Invalid recipe item type " + input.getClass().getName() + "!");
         }

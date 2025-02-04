@@ -10,11 +10,10 @@ import net.glasslauncher.hmifabric.tabs.TabRegistry;
 import net.glasslauncher.hmifabric.tabs.TabSmelting;
 import net.mine_diver.unsafeevents.listener.EventListener;
 import net.minecraft.block.Block;
-import net.minecraft.class_564;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.container.ContainerScreen;
-import net.minecraft.inventory.Container;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.util.ScreenScaler;
 import net.minecraft.item.ItemStack;
 import net.modificationstation.stationapi.api.client.event.network.MultiplayerLogoutEvent;
 import net.modificationstation.stationapi.api.client.event.option.KeyBindingRegisterEvent;
@@ -45,11 +44,11 @@ public class HowManyItemsClient {
         event.keyBindings.add(KeyBindings.toggleOverlay);
     }
 
-    public static void addGuiToBlock(Class<? extends ContainerScreen> gui, ItemStack item) {
+    public static void addGuiToBlock(Class<? extends HandledScreen> gui, ItemStack item) {
         TabUtils.putItemGui(gui, item);
     }
 
-    public static void addWorkBenchGui(Class<? extends ContainerScreen> gui) {
+    public static void addWorkBenchGui(Class<? extends HandledScreen> gui) {
         TabUtils.addWorkBenchGui(gui);
     }
 
@@ -66,8 +65,8 @@ public class HowManyItemsClient {
     }
 
     public void onTickInGUI(Minecraft mc, Screen guiscreen) {
-        if (guiscreen instanceof ContainerScreen) {
-            ContainerScreen screen = (ContainerScreen) guiscreen;
+        if (guiscreen instanceof HandledScreen) {
+            HandledScreen screen = (HandledScreen) guiscreen;
             if (Config.config.overlayEnabled) {
                 if (GuiOverlay.screen != screen || overlay == null || screen.width != overlay.width || screen.height != overlay.height) {
                     overlay = new GuiOverlay(screen);
@@ -80,12 +79,12 @@ public class HowManyItemsClient {
                     boolean getUses = Utils.isKeyDown(KeyBindings.pushUses);
                     ItemStack newFilter = null;
 
-                    class_564 scaledresolution = new class_564(mc.options, mc.displayWidth, mc.displayHeight);
-                    int i = scaledresolution.method_1857();
-                    int j = scaledresolution.method_1858();
+                    ScreenScaler scaledresolution = new ScreenScaler(mc.options, mc.displayWidth, mc.displayHeight);
+                    int i = scaledresolution.getScaledWidth();
+                    int j = scaledresolution.getScaledHeight();
                     int posX = (Mouse.getEventX() * i) / mc.displayWidth;
                     int posY = j - (Mouse.getEventY() * j) / mc.displayHeight - 1;
-                    newFilter = Utils.hoveredItem((ContainerScreen) guiscreen, posX, posY);
+                    newFilter = Utils.hoveredItem((HandledScreen) guiscreen, posX, posY);
                     if (newFilter == null) {
                         newFilter = GuiOverlay.hoverItem;
                     }
@@ -155,11 +154,11 @@ public class HowManyItemsClient {
             } else if (!GuiOverlay.searchBoxFocused() && getTabs().size() > 0) {
                 GuiRecipeViewer newgui = new GuiRecipeViewer(item, getUses, gui);
                 Utils.getMC().currentScreen = newgui;
-                class_564 scaledresolution = new class_564(Utils.getMC().options, Utils.getMC().displayWidth, Utils.getMC().displayHeight);
-                int i = scaledresolution.method_1857();
-                int j = scaledresolution.method_1858();
+                ScreenScaler scaledresolution = new ScreenScaler(Utils.getMC().options, Utils.getMC().displayWidth, Utils.getMC().displayHeight);
+                int i = scaledresolution.getScaledWidth();
+                int j = scaledresolution.getScaledHeight();
                 newgui.init(Utils.getMC(), i, j);
-                Utils.getMC().field_2821 = false;
+                Utils.getMC().skipGameRender = false;
             }
         }
     }
@@ -168,14 +167,14 @@ public class HowManyItemsClient {
         if (gui instanceof GuiRecipeViewer) {
             ((GuiRecipeViewer) gui).pushTabBlock(item);
         } else if (!GuiOverlay.searchBoxFocused() && getTabs().size() > 0) {
-            Utils.getMC().method_2133();
+            Utils.getMC().lockMouse();
             GuiRecipeViewer newgui = new GuiRecipeViewer(item, gui);
             Utils.getMC().currentScreen = newgui;
-            class_564 scaledresolution = new class_564(Utils.getMC().options, Utils.getMC().displayWidth, Utils.getMC().displayHeight);
-            int i = scaledresolution.method_1857();
-            int j = scaledresolution.method_1858();
+            ScreenScaler scaledresolution = new ScreenScaler(Utils.getMC().options, Utils.getMC().displayWidth, Utils.getMC().displayHeight);
+            int i = scaledresolution.getScaledWidth();
+            int j = scaledresolution.getScaledHeight();
             newgui.init(Utils.getMC(), i, j);
-            Utils.getMC().field_2821 = false;
+            Utils.getMC().skipGameRender = false;
         }
     }
 

@@ -3,7 +3,7 @@ package net.glasslauncher.hmifabric.tabs;
 import com.mojang.serialization.Lifecycle;
 import net.glasslauncher.hmifabric.HowManyItems;
 import net.glasslauncher.hmifabric.TabUtils;
-import net.minecraft.client.gui.screen.container.ContainerScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.ItemStack;
 import net.modificationstation.stationapi.api.registry.*;
 import net.modificationstation.stationapi.api.util.Identifier;
@@ -27,7 +27,7 @@ public class TabRegistry extends SimpleRegistry<Tab> {
         public void draw(int x, int y, int recipeOnThisPageIndex, int cursorX, int cursorY) {}
 
         @Override
-        public Class<? extends ContainerScreen> getGuiClass() {
+        public Class<? extends HandledScreen> getGuiClass() {
             return null;
         }
     };

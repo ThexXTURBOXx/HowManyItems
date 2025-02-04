@@ -1,20 +1,22 @@
 plugins {
+    id 'idea'
+    id 'java-library'
     id 'maven-publish'
-    id 'babric-loom' version '1.0.1'
+    id "fabric-loom" version "1.9-SNAPSHOT"
+    id "babric-loom-extension" version "1.9-SNAPSHOT"
 }
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+tasks.withType(JavaCompile).configureEach {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
 
-archivesBaseName = project.archives_base_name
+base {
+    archivesBaseName = project.archives_base_name
+}
+
 version = project.mod_version
 group = project.maven_group
-
-loom {
-    gluedMinecraftJar()
-    customMinecraftManifest.set("https://babric.github.io/manifest-polyfill/${minecraft_version}.json")
-    intermediaryUrl.set("https://maven.glass-launcher.net/babric/babric/intermediary/%1\$s/intermediary-%1\$s-v2.jar")
-}
 
 idea {
     module {
@@ -77,7 +79,7 @@ dependencies {
     // to change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.glasslauncher:biny:${project.yarn_mappings}:v2"
-    modImplementation "babric:fabric-loader:${project.loader_version}"
+    modApi "net.fabricmc:fabric-loader:${project.loader_version}"
 
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.2'
 
@@ -136,10 +138,6 @@ publishing {
         mavenLocal()
         maven {
             url = "https://maven.glass-launcher.net/releases"
-            credentials {
-                username "${project.glass_maven_username}"
-                password "${project.glass_maven_password}"
-            }
         }
     }
 

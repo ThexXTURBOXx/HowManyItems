@@ -2,7 +2,7 @@ package net.glasslauncher.hmifabric.tabs;
 
 import net.glasslauncher.hmifabric.Utils;
 import net.minecraft.block.Block;
-import net.minecraft.client.gui.screen.container.ContainerScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.ItemStack;
 import net.modificationstation.stationapi.api.util.Namespace;
 
@@ -72,7 +72,7 @@ public class TabGenericBlock extends Tab {
                 for (int i = 0; i < recipe.length; i++) {
                     items[j][i] = recipe[i];
                     if (recipe[i] != null && recipe[i].getDamage() == -1) {
-                        if (recipe[i].method_719()) {
+                        if (recipe[i].hasSubtypes()) {
                             if (filter != null && recipe[i].itemId == filter.itemId) {
                                 items[j][i] = new ItemStack(recipe[i].getItem(), 0, filter.getDamage());
                             } else {
@@ -120,14 +120,14 @@ public class TabGenericBlock extends Tab {
                 addRecipe = true;
             } else if (getUses) {
                 for (int i = 0; i < inputs.length; i++) {
-                    if (inputs[i].itemId == filter.itemId && (inputs[i].getDamage() == filter.getDamage() || inputs[i].getDamage() < 0 || !inputs[i].method_719())) {
+                    if (inputs[i].itemId == filter.itemId && (inputs[i].getDamage() == filter.getDamage() || inputs[i].getDamage() < 0 || !inputs[i].hasSubtypes())) {
                         addRecipe = true;
                         break;
                     }
                 }
             } else {
                 for (int i = 0; i < outputs.length; i++) {
-                    if (outputs[i].itemId == filter.itemId && (outputs[i].getDamage() == filter.getDamage() || outputs[i].getDamage() < 0 || !outputs[i].method_719())) {
+                    if (outputs[i].itemId == filter.itemId && (outputs[i].getDamage() == filter.getDamage() || outputs[i].getDamage() < 0 || !outputs[i].hasSubtypes())) {
                         addRecipe = true;
                         break;
                     }
@@ -178,7 +178,7 @@ public class TabGenericBlock extends Tab {
     }
 
     @Override
-    public Class<? extends ContainerScreen> getGuiClass() {
+    public Class<? extends HandledScreen> getGuiClass() {
         return null;
     }
 

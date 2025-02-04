@@ -3,12 +3,12 @@ package net.glasslauncher.hmifabric;
 import net.glasslauncher.hmifabric.mixin.access.ContainerBaseAccessor;
 import net.glasslauncher.hmifabric.mixin.access.LevelAccessor;
 import net.glasslauncher.hmifabric.mixin.access.ScreenBaseAccessor;
-import net.minecraft.class_564;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.container.ContainerScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.TranslationStorage;
+import net.minecraft.client.util.ScreenScaler;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
@@ -28,7 +28,7 @@ import java.util.Stack;
 
 public class GuiOverlay extends Screen {
 
-    public static ContainerScreen screen;
+    public static HandledScreen screen;
     private final int BUTTON_HEIGHT = 20;
     private static ArrayList<ItemStack> currentItems;
 
@@ -56,7 +56,7 @@ public class GuiOverlay extends Screen {
     public int xSize = 0;
     public int ySize = 0;
 
-    public GuiOverlay(ContainerScreen gui) {
+    public GuiOverlay(HandledScreen gui) {
         super();
         if(hiddenItems == null) hiddenItems = Utils.hiddenItems;
         if(currentItems == null) currentItems = getCurrentList(Utils.itemList());
@@ -268,7 +268,7 @@ public class GuiOverlay extends Screen {
                     }
                 }
                 else if(hiddenItems.contains(hoverItem)) {
-                    if(shiftHeld && hoverItem.method_719()) {
+                    if(shiftHeld && hoverItem.hasSubtypes()) {
                         s = "Unhide all items with same ID and higher dmg";
                     }
                     else {
@@ -276,7 +276,7 @@ public class GuiOverlay extends Screen {
                     }
                 }
                 else {
-                    if(shiftHeld && hoverItem.method_719()) {
+                    if(shiftHeld && hoverItem.hasSubtypes()) {
                         s = "Hide all items with same ID and higher dmg";
                     }
                     else {
@@ -358,13 +358,13 @@ public class GuiOverlay extends Screen {
                 Utils.drawRect(k, i2 - 15, k1 + j2 + 15, i2 - 1, 0xc0000000);
                 textRenderer.drawWithShadow(s, k1 + 12, i2 - 12, -1);
             }
-            if(s.length() == 0) {
+            if(s.isEmpty()) {
                 Utils.drawTooltip(Utils.getNiceItemName(item), k1, i2);
             }
             else if(Config.config.showItemIDs) {
                 s = " " + item.itemId;
-                /*if(item.method_719())*/ s+= ":" + item.getDamage();
-                if (item.getItem().method_465()) s+= "/" + item.getItem().getMaxDamage();
+                /*if(item.hasSubtypes())*/ s+= ":" + item.getDamage();
+                if (item.getItem().isDamageable()) s+= "/" + item.getItem().getMaxDamage();
                 int j3 = textRenderer.getWidth(s);
                 Utils.drawRect(k1 + j2 + 15, i2 - 15, k1 + j2 + j3 + 15, i2 + 8 - 9, 0xc0000000);
                 textRenderer.drawWithShadow(s, k1 + j2 + 12, i2 - 12, -1);
@@ -395,7 +395,7 @@ public class GuiOverlay extends Screen {
                                 ItemStack spawnedItem = hoverItem.copy();
                                 if(eventButton == 0) spawnedItem.count = hoverItem.getMaxCount();
                                 else spawnedItem.count = 1;
-                                minecraft.player.inventory.method_671(spawnedItem);
+                                minecraft.player.inventory.addStack(spawnedItem);
                             }
                             else if (Config.isHMIServer) {
                                 ItemStack spawnedItem = hoverItem.copy();
@@ -462,7 +462,7 @@ public class GuiOverlay extends Screen {
                 }
             }
             else if(Config.config.cheatsEnabled && !minecraft.world.isRemote && buttonTrash.isMouseOver(minecraft, posX, posY) && minecraft.player.inventory.getCursorStack() != null && eventButton == 1) {
-                minecraft.soundManager.method_2009("random.click", 1.0F, 1.0F);
+                minecraft.soundManager.playSound("random.click", 1.0F, 1.0F);
                 if(minecraft.player.inventory.getCursorStack().count > 1) {
                     minecraft.player.inventory.setCursorStack(minecraft.player.inventory.getCursorStack().split(minecraft.player.inventory.getCursorStack().count - 1));
                 }
@@ -560,10 +560,10 @@ public class GuiOverlay extends Screen {
         }
         else if(guibutton == buttonHeal) {
             if(!minecraft.world.isRemote) {
-                minecraft.player.method_939(100);
+                minecraft.player.heal(100);
                 minecraft.player.air = 300;
-                if(minecraft.player.method_1359()) {
-                    minecraft.player.fire = -minecraft.player.field_1646;
+                if(minecraft.player.isOnFire()) {
+                    minecraft.player.fireTicks = -minecraft.player.fireImmunityTicks;
                     minecraft.world.playSound(minecraft.player, "random.fizz", 0.7F, 1.6F + (Utils.rand.nextFloat() - Utils.rand.nextFloat()) * 0.4F);
                 }
             }
@@ -611,9 +611,9 @@ public class GuiOverlay extends Screen {
         if(!searchBoxFocused() && Config.config.fastSearch && !HowManyItemsClient.keyHeldLastTick) {
             if(!Utils.keyEquals(i, minecraft.options.inventoryKey) && !Utils.keyEquals(i, KeyBindings.allRecipes) && !Utils.keyEquals(i, KeyBindings.toggleOverlay)
                     && (CharacterUtils.VALID_CHARACTERS.indexOf(c) >= 0 || (i == Keyboard.KEY_BACK && searchBox.getText().length() > 0))) {
-                class_564 scaledresolution = new class_564(minecraft.options, minecraft.displayWidth, minecraft.displayHeight);
-                int i2 = scaledresolution.method_1857();
-                int j2 = scaledresolution.method_1858();
+                ScreenScaler scaledresolution = new ScreenScaler(minecraft.options, minecraft.displayWidth, minecraft.displayHeight);
+                int i2 = scaledresolution.getScaledWidth();
+                int j2 = scaledresolution.getScaledHeight();
                 int posX = (Mouse.getEventX() * i2) / minecraft.displayWidth;
                 int posY = j2 - (Mouse.getEventY() * j2) / minecraft.displayHeight - 1;
                 if((Utils.hoveredItem(screen, posX, posY) == null && hoverItem == null) || (!Utils.keyEquals(i, KeyBindings.pushRecipe) && !Utils.keyEquals(i, KeyBindings.pushUses))){
@@ -657,9 +657,9 @@ public class GuiOverlay extends Screen {
                             else if (HowManyItemsClient.getTabs().size() > 0){
                                 GuiRecipeViewer newgui = new GuiRecipeViewer(null, false, screen);
                                 minecraft.currentScreen = newgui;
-                                class_564 scaledresolution = new class_564(minecraft.options, minecraft.displayWidth, minecraft.displayHeight);
-                                int i2 = scaledresolution.method_1857();
-                                int j2 = scaledresolution.method_1858();
+                                ScreenScaler scaledresolution = new ScreenScaler(minecraft.options, minecraft.displayWidth, minecraft.displayHeight);
+                                int i2 = scaledresolution.getScaledWidth();
+                                int j2 = scaledresolution.getScaledHeight();
                                 newgui.init(minecraft, i2, j2);
                             }
                         }
@@ -855,9 +855,9 @@ public class GuiOverlay extends Screen {
     }
 
     public void onTick() {
-        class_564 res = new class_564(minecraft.options, minecraft.displayWidth, minecraft.displayHeight);
-        int posX = (Mouse.getX() * res.method_1857()) / minecraft.displayWidth;
-        int posY = res.method_1858() - (Mouse.getY() * res.method_1858()) / minecraft.displayHeight - 1;
+        ScreenScaler res = new ScreenScaler(minecraft.options, minecraft.displayWidth, minecraft.displayHeight);
+        int posX = (Mouse.getX() * res.getScaledWidth()) / minecraft.displayWidth;
+        int posY = res.getScaledHeight() - (Mouse.getY() * res.getScaledHeight()) / minecraft.displayHeight - 1;
         Utils.preRender();
         drawScreen(posX, posY);
         if(mouseOverUI(minecraft, posX, posY)) {
