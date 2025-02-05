@@ -64,7 +64,7 @@ public class GuiOverlay extends Screen {
         lastKeyTimeout = System.currentTimeMillis() + 200L;
         lastKey = Keyboard.getEventKey();
 
-        if(HowManyItemsClient.getTabs().size() > 0) guiBlock = TabUtils.getItemFromGui(screen);
+        if(!HowManyItemsClient.getTabs().isEmpty()) guiBlock = TabUtils.getItemFromGui(screen);
 
         init(Utils.getMC(), screen.width, screen.height);
 
@@ -127,9 +127,8 @@ public class GuiOverlay extends Screen {
         int w = screen.width - (screen.width - xSize) / 2 - xSize - 1;
 
         Utils.disableLighting();
-        for(int kx = 0; kx < buttons.size(); kx++)
-        {
-            ((ButtonWidget)buttons.get(kx)).render(minecraft, posX, posY);
+        for (Object button : buttons) {
+            ((ButtonWidget) button).render(minecraft, posX, posY);
         }
         searchBox.render();
 
@@ -137,7 +136,7 @@ public class GuiOverlay extends Screen {
 
         int x = 0;
         int y = 0;
-        Boolean itemHovered = false;
+        boolean itemHovered = false;
         PlayerInventory inventoryplayer = minecraft.player.inventory;
         int canvasHeight = screen.height - BUTTON_HEIGHT * 2;
         if(Config.config.centredSearchBar) canvasHeight += BUTTON_HEIGHT;
@@ -226,8 +225,7 @@ public class GuiOverlay extends Screen {
                         hiddenItems.add(currentItem);
                 }
                 else {
-                    if(hiddenItems.contains(currentItem))
-                        hiddenItems.remove(hiddenItems.indexOf(currentItem));
+                    hiddenItems.remove(currentItem);
                 }
             }
             draggingFrom = null;
@@ -293,7 +291,7 @@ public class GuiOverlay extends Screen {
         }
         else if(buttonOptions.isMouseOver(minecraft, posX, posY))
         {
-            if(!shiftHeld || HowManyItemsClient.getTabs().size() == 0) {
+            if(!shiftHeld || HowManyItemsClient.getTabs().isEmpty()) {
                 s = "Settings";
             }
             else if(guiBlock != null) {
@@ -398,7 +396,7 @@ public class GuiOverlay extends Screen {
                                 customData.objects = new Object[] {spawnedItem};
                                 PacketHelper.send(customData);
                             }
-                            else if(Config.config.mpGiveCommand.length() > 0) {
+                            else if(!Config.config.mpGiveCommand.isEmpty()) {
                                 NumberFormat numberformat = NumberFormat.getIntegerInstance();
                                 numberformat.setGroupingUsed(false);
                                 MessageFormat messageformat = new MessageFormat(Config.config.mpGiveCommand);
@@ -406,7 +404,7 @@ public class GuiOverlay extends Screen {
                                 messageformat.setFormatByArgumentIndex(2, numberformat);
                                 messageformat.setFormatByArgumentIndex(3, numberformat);
                                 Object aobj[] = {
-                                        minecraft.player.name, hoverItem.itemId, (eventButton == 0) ? hoverItem.getMaxCount() : 1, Integer.valueOf(hoverItem.getDamage())
+                                        minecraft.player.name, hoverItem.itemId, (eventButton == 0) ? hoverItem.getMaxCount() : 1, hoverItem.getDamage()
                                 };
                                 minecraft.player.sendChatMessage(messageformat.format((aobj)));
                             }

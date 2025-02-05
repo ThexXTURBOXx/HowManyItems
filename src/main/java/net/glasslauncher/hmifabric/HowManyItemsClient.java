@@ -9,12 +9,15 @@ import net.glasslauncher.hmifabric.tabs.TabCrafting;
 import net.glasslauncher.hmifabric.tabs.TabRegistry;
 import net.glasslauncher.hmifabric.tabs.TabSmelting;
 import net.mine_diver.unsafeevents.listener.EventListener;
+import net.mine_diver.unsafeevents.listener.ListenerPriority;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.util.ScreenScaler;
 import net.minecraft.item.ItemStack;
+import net.modificationstation.stationapi.api.StationAPI;
+import net.modificationstation.stationapi.api.client.event.gui.screen.container.TooltipRenderEvent;
 import net.modificationstation.stationapi.api.client.event.network.MultiplayerLogoutEvent;
 import net.modificationstation.stationapi.api.client.event.option.KeyBindingRegisterEvent;
 import net.modificationstation.stationapi.api.event.registry.MessageListenerRegistryEvent;
@@ -65,8 +68,7 @@ public class HowManyItemsClient {
     }
 
     public void onTickInGUI(Minecraft mc, Screen guiscreen) {
-        if (guiscreen instanceof HandledScreen) {
-            HandledScreen screen = (HandledScreen) guiscreen;
+        if (guiscreen instanceof HandledScreen screen) {
             if (Config.config.overlayEnabled) {
                 if (GuiOverlay.screen != screen || overlay == null || screen.width != overlay.width || screen.height != overlay.height) {
                     overlay = new GuiOverlay(screen);
@@ -151,7 +153,7 @@ public class HowManyItemsClient {
         if (Utils.getMC().player.inventory.getCursorStack() == null) {
             if (gui instanceof GuiRecipeViewer) {
                 ((GuiRecipeViewer) gui).push(item, getUses);
-            } else if (!GuiOverlay.searchBoxFocused() && getTabs().size() > 0) {
+            } else if (!GuiOverlay.searchBoxFocused() && !getTabs().isEmpty()) {
                 GuiRecipeViewer newgui = new GuiRecipeViewer(item, getUses, gui);
                 Utils.getMC().currentScreen = newgui;
                 ScreenScaler scaledresolution = new ScreenScaler(Utils.getMC().options, Utils.getMC().displayWidth, Utils.getMC().displayHeight);
