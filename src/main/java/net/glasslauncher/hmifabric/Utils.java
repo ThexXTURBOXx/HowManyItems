@@ -11,11 +11,14 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.platform.Lighting;
 import net.minecraft.client.resource.language.TranslationStorage;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.CraftingRecipe;
 import net.minecraft.recipe.CraftingRecipeManager;
 import net.minecraft.screen.slot.Slot;
+import net.modificationstation.stationapi.api.StationAPI;
+import net.modificationstation.stationapi.api.client.event.gui.screen.container.TooltipRenderEvent;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
@@ -41,7 +44,7 @@ public class Utils {
     //Returns the translated name of an itemstack with its ID if config allows and ID is wanted
     public static String getNiceItemName(ItemStack item, boolean withID) {
         String s = TranslationStorage.getInstance().getClientTranslation(item.getTranslationKey());
-        if (s == null || s.length() == 0) {
+        if (s == null || s.isEmpty()) {
             s = item.getTranslationKey();
             if (s == null) s = "null";
         }
@@ -195,17 +198,36 @@ public class Utils {
         tooltipY = y;
     }
 
+    public static void setTooltipData(ItemStack st, PlayerInventory inv) {
+        stack = st;
+        inventory = inv;
+    }
+
     public static void drawStoredToolTip() {
         if (tooltipText != null) {
             disableLighting();
-            int k1 = tooltipX + 12;
-            int i2 = tooltipY - 12;
-            int j2 = getMC().textRenderer.getWidth(tooltipText);
-            drawRect(k1 - 3, i2 - 3, k1 + j2 + 3, i2 + 8 + 3, 0xc0000000);
-            getMC().textRenderer.drawWithShadow(tooltipText, k1, i2, -1);
-            tooltipText = null;
+            if (stack == null || inventory == null) {
+                int k1 = tooltipX + 12;
+                int i2 = tooltipY - 12;
+                int j2 = getMC().textRenderer.getWidth(tooltipText);
+                drawRect(k1 - 3, i2 - 3, k1 + j2 + 3, i2 + 8 + 3, 0xc0000000);
+                getMC().textRenderer.drawWithShadow(tooltipText, k1, i2, -1);
+            } else {
+                StationAPI.EVENT_BUS.post(
+                        TooltipRenderEvent.builder()
+                                .itemStack(stack)
+                                .textManager(getMC().textRenderer)
+                                .inventory(inventory)
+                                .mouseX(tooltipX).mouseY(tooltipY)
+                                .delta(0)
+                                .originalTooltip(tooltipText)
+                                .build()
+                );
+            }
             postRender();
         }
+        tooltipText = null;
+        stack = null;
     }
 
     public static void disableLighting() {
@@ -267,6 +289,8 @@ public class Utils {
     private static String tooltipText;
     private static int tooltipX;
     private static int tooltipY;
+    private static ItemStack stack;
+    private static PlayerInventory inventory;
 
     public static void drawString(String s, int x, int y) {
         disableLighting();

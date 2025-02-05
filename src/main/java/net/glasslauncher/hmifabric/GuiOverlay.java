@@ -110,7 +110,7 @@ public class GuiOverlay extends Screen {
 
     public void drawScreen(int posX, int posY) {
         boolean shiftHeld = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
-        if(shiftHeld && HowManyItemsClient.getTabs().size() > 0) {
+        if(shiftHeld && !HowManyItemsClient.getTabs().isEmpty()) {
             buttonOptions.iconIndex = 2;
             if(buttonTrash != null) {
                 buttonTrash.text = "Delete ALL";
@@ -257,6 +257,7 @@ public class GuiOverlay extends Screen {
         if (inventoryplayer.getCursorStack() == null && hoverItem != null) {
             if(!showHiddenItems) {
                 s = Utils.getNiceItemName(hoverItem);
+                Utils.setTooltipData(hoverItem, inventoryplayer);
             }
             else {
                 if(draggingFrom != null && draggingFrom != hoverItem) {
@@ -333,7 +334,7 @@ public class GuiOverlay extends Screen {
                 else s = "Delete " + Utils.getNiceItemName(inventoryplayer.getCursorStack());
             }
         }
-        if(s.length() > 0)
+        if(!s.isEmpty())
         {
             int k1 = posX;
             int i2 = posY;
@@ -351,24 +352,16 @@ public class GuiOverlay extends Screen {
         else if(inventoryplayer.getCursorStack() == null && Utils.hoveredItem(screen, posX, posY) != null) {
             ItemStack item = Utils.hoveredItem(screen, posX, posY);
             s = TranslationStorage.getInstance().getClientTranslation(item.getTranslationKey());
-            int k1 = posX;
-            int i2 = posY;
-            int j2 = textRenderer.getWidth(s);
-            if(k1 + 9 <= k && k1 + j2 + 15 > k) {
-                Utils.drawRect(k, i2 - 15, k1 + j2 + 15, i2 - 1, 0xc0000000);
-                textRenderer.drawWithShadow(s, k1 + 12, i2 - 12, -1);
-            }
             if(s.isEmpty()) {
-                Utils.drawTooltip(Utils.getNiceItemName(item), k1, i2);
+                s = Utils.getNiceItemName(item);
             }
             else if(Config.config.showItemIDs) {
-                s = " " + item.itemId;
+                s += " " + item.itemId;
                 /*if(item.hasSubtypes())*/ s+= ":" + item.getDamage();
                 if (item.getItem().isDamageable()) s+= "/" + item.getItem().getMaxDamage();
-                int j3 = textRenderer.getWidth(s);
-                Utils.drawRect(k1 + j2 + 15, i2 - 15, k1 + j2 + j3 + 15, i2 + 8 - 9, 0xc0000000);
-                textRenderer.drawWithShadow(s, k1 + j2 + 12, i2 - 12, -1);
             }
+            Utils.drawTooltip(s, posX, posY);
+            Utils.setTooltipData(item, inventoryplayer);
         }
     }
 
