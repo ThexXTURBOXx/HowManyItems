@@ -237,4 +237,11 @@ public class HowManyItemsClient {
         event.registry.register(Identifier.of(Namespace.MINECRAFT, "smelting"), new TabSmelting(HowManyItems.MODID), new ItemStack(Block.FURNACE));
         event.registry.addEquivalentCraftingStation(Identifier.of(Namespace.MINECRAFT, "smelting"), new ItemStack(Block.LIT_FURNACE));
     }
+
+    @EventListener(phase = StationAPI.INTERNAL_PHASE, priority = ListenerPriority.HIGHEST)
+    public void disableVanillaTooltips(TooltipRenderEvent e) {
+        if (e.container != null) {
+            e.setCanceled(true);
+        }
+    }
 }
