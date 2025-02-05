@@ -1,19 +1,15 @@
 package net.glasslauncher.hmifabric;
 
-import blue.endless.jankson.Comment;
-import blue.endless.jankson.JsonObject;
-import blue.endless.jankson.JsonPrimitive;
 import net.glasslauncher.hmifabric.tabs.Tab;
 import net.glasslauncher.hmifabric.tabs.TabRegistry;
-import net.glasslauncher.mods.api.gcapi.api.ConfigName;
-import net.glasslauncher.mods.api.gcapi.api.GCAPI;
-import net.glasslauncher.mods.api.gcapi.api.GConfig;
-import net.glasslauncher.mods.api.gcapi.api.MultiplayerSynced;
-import net.glasslauncher.mods.api.gcapi.impl.ConfigFactories;
-import net.modificationstation.stationapi.api.util.Identifier;
+import net.glasslauncher.mods.gcapi3.api.ConfigEntry;
+import net.glasslauncher.mods.gcapi3.api.ConfigRoot;
+import net.glasslauncher.mods.gcapi3.api.GCAPI;
+import net.glasslauncher.mods.gcapi3.impl.ConfigFactories;
 
 import java.lang.reflect.*;
 import java.util.*;
+import net.glasslauncher.mods.gcapi3.impl.GlassYamlFile;
 
 public class Config {
 
@@ -60,68 +56,62 @@ public class Config {
 
     public static void writeConfig() {
         try {
-            JsonObject jsonObject = new JsonObject();
-            for (Field field : ConfigFields.class.getDeclaredFields()) {
-                jsonObject.put(field.getName(), ConfigFactories.saveFactories.get(field.getType()).apply(field.get(config)));
+            GlassYamlFile cfg = new GlassYamlFile();
+            for (Field field : ConfigFields.class.getFields()) {
+                cfg.set(field.getName(), ConfigFactories.saveFactories.get(field.getType()).apply(field.get(config)));
             }
-            jsonObject.put("forceNotMultiplayer", new JsonPrimitive(true));
-            GCAPI.reloadConfig(Identifier.of("hmifabric:config"), jsonObject.toJson());
+            cfg.set("forceNotMultiplayer", true);
+            GCAPI.reloadConfig("hmifabric:config", cfg);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
     }
 
-    @GConfig(value = "config", visibleName = "HMI Config")
-    public static ConfigFields config = new ConfigFields();
+    @ConfigRoot(value = "config", visibleName = "HMI Config")
+    public static final ConfigFields config = new ConfigFields();
 
     public static boolean isHMIServer = false;
 
     public static class ConfigFields {
-        @ConfigName("Overlay Enabled")
+        @ConfigEntry(name = "Overlay Enabled")
         public Boolean overlayEnabled = true;
-        @ConfigName("Cheats Enabled")
+        @ConfigEntry(name = "Cheats Enabled")
         public Boolean cheatsEnabled = false;
-        @ConfigName("Show Item IDs")
+        @ConfigEntry(name = "Show Item IDs")
         public Boolean showItemIDs = false;
-        @ConfigName("Center Search Bar")
+        @ConfigEntry(name = "Center Search Bar")
         public Boolean centredSearchBar = false;
-        @ConfigName("Fast Search")
+        @ConfigEntry(name = "Fast Search")
         public Boolean fastSearch = false;
-        @ConfigName("Inverted Scrolling")
+        @ConfigEntry(name = "Inverted Scrolling")
         public Boolean scrollInverted = false;
 
-        @MultiplayerSynced
-        @ConfigName("Multiplayer Give Command")
+        @ConfigEntry(name = "Multiplayer Give Command", multiplayerSynced = true)
         public String mpGiveCommand = "/give {0} {1} {2}";
-        @MultiplayerSynced
-        @ConfigName("Multiplayer Heal Command")
+        @ConfigEntry(name = "Multiplayer Heal Command", multiplayerSynced = true)
         public String mpHealCommand = "";
-        @MultiplayerSynced
-        @ConfigName("Multiplayer Time Day Command")
+        @ConfigEntry(name = "Multiplayer Time Day Command", multiplayerSynced = true)
         public String mpTimeDayCommand = "/time set 0";
-        @MultiplayerSynced
-        @ConfigName("Multiplayer Time Night Command")
+        @ConfigEntry(name = "Multiplayer Time Night Command", multiplayerSynced = true)
         public String mpTimeNightCommand = "/time set 13000";
-        @MultiplayerSynced
-        @ConfigName("Multiplayer Rain On Command")
+        @ConfigEntry(name = "Multiplayer Rain On Command", multiplayerSynced = true)
         public String mpRainONCommand = "";
-        @MultiplayerSynced
-        @ConfigName("Multiplayer Rain Off Command")
+        @ConfigEntry(name = "Multiplayer Rain Off Command", multiplayerSynced = true)
         public String mpRainOFFCommand = "";
 
-        @ConfigName("Draggable Recipe Viewer")
+        @ConfigEntry(name = "Draggable Recipe Viewer")
         public Boolean recipeViewerDraggableGui = false;
-        @ConfigName("Show Null Name Items")
-        @Comment("Shows items with null names. Can cause crashes with poorly made mods.")
+        @ConfigEntry(name = "Show Null Name Items",
+                     comment = "Shows items with null names. Can cause crashes with poorly made mods.")
         public Boolean hideNullNames = false;
 
-        @ConfigName("Developer Mode")
-        @Comment("Enables some extra tooltips. Breaks relatively easily, but shouldn't cause crashes.")
+        @ConfigEntry(name = "Developer Mode",
+                     comment = "Enables some extra tooltips. Breaks relatively easily, but shouldn't cause crashes.")
         public Boolean devMode = false;
 
-        @ConfigName("Recipe Viewer GUI Width")
+        @ConfigEntry(name = "Recipe Viewer GUI Width", maxLength = Integer.MAX_VALUE)
         public Integer recipeViewerGuiWidth = 251;
-        @ConfigName("Recipe Viewer GUI Height")
+        @ConfigEntry(name = "Recipe Viewer GUI Height", maxLength = Integer.MAX_VALUE)
         public Integer recipeViewerGuiHeight = 134;
     }
 }
