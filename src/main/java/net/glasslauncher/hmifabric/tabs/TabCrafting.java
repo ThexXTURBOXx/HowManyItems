@@ -1,6 +1,10 @@
 package net.glasslauncher.hmifabric.tabs;
 
+import com.mojang.datafixers.util.Either;
+import java.util.function.Function;
 import net.glasslauncher.hmifabric.Utils;
+import net.glasslauncher.hmifabric.mixin.access.ShapedRecipeAccessor;
+import net.glasslauncher.hmifabric.mixin.access.ShapelessRecipeAccessor;
 import net.minecraft.block.Block;
 import net.minecraft.client.InteractionManager;
 import net.minecraft.client.gui.screen.Screen;
@@ -11,12 +15,18 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.util.ScreenScaler;
 import net.minecraft.entity.player.ClientPlayerEntity;
 import net.minecraft.inventory.Inventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.CraftingRecipe;
 import net.minecraft.recipe.CraftingRecipeManager;
+import net.minecraft.recipe.ShapedRecipe;
 import net.minecraft.recipe.ShapelessRecipe;
 import net.minecraft.screen.slot.Slot;
+import net.modificationstation.stationapi.api.registry.ItemRegistry;
+import net.modificationstation.stationapi.api.tag.TagKey;
 import net.modificationstation.stationapi.api.util.Namespace;
+import net.modificationstation.stationapi.impl.recipe.StationShapedRecipe;
+import net.modificationstation.stationapi.impl.recipe.StationShapelessRecipe;
 import org.lwjgl.input.Keyboard;
 
 import java.util.*;
@@ -29,6 +39,8 @@ public class TabCrafting extends TabWithTexture {
     private boolean isVanillaWorkbench = false; //THIS IS LAZY
     public ArrayList<Class<? extends HandledScreen>> guiCraftingStations = new ArrayList<>();
     public int recipeIndex;
+
+    private static final Random RANDOM = new Random();
 
     public TabCrafting(Namespace tabCreator) {
         this(tabCreator, new ArrayList<Object>(CraftingRecipeManager.getInstance().getRecipes()), Block.CRAFTING_TABLE);
@@ -95,28 +107,25 @@ public class TabCrafting extends TabWithTexture {
             if (k < recipes.size()) {
                 try {
                     Object recipeObj = recipes.get(k);
-                    /*if (recipeObj instanceof StationRecipe) {
-                        StationRecipe recipe = (StationRecipe) recipes.get(k);
-                        ItemStack[] list = recipe.getIngredients();
-                        ItemStack[] outputArray = recipe.getOutputs();
-                        System.arraycopy(outputArray, 0, items[j], 0, outputArray.length);
-                        for (int j1 = 0; j1 < list.length; j1++) {
-                            ItemStack item = list[j1];
-                            items[j][j1 + 1] = item;
-                            if (item != null && item.getDamage() == -1) {
-                                if (item.hasSubtypes()) {
-                                    if (filter != null && item.itemId == filter.itemId) {
-                                        items[j][j1 + 1] = new ItemStack(item.getItem(), 0, filter.getDamage());
-                                    } else {
-                                        items[j][j1 + 1] = new ItemStack(item.getItem());
-                                    }
-                                } else if (filter != null && item.itemId == filter.itemId) {
+                    ItemStack[] list = getIngredients(recipeObj);
+                    ItemStack[] outputArray = getOutputs(recipeObj);
+                    if (list == null || outputArray == null) continue;
+                    System.arraycopy(outputArray, 0, items[j], 0, outputArray.length);
+                    for (int j1 = 0; j1 < list.length; j1++) {
+                        ItemStack item = list[j1];
+                        items[j][j1 + 1] = item;
+                        if (item != null && item.getDamage() == -1) {
+                            if (item.hasSubtypes()) {
+                                if (filter != null && item.itemId == filter.itemId) {
                                     items[j][j1 + 1] = new ItemStack(item.getItem(), 0, filter.getDamage());
+                                } else {
+                                    items[j][j1 + 1] = new ItemStack(item.getItem());
                                 }
+                            } else if (filter != null && item.itemId == filter.itemId) {
+                                items[j][j1 + 1] = new ItemStack(item.getItem(), 0, filter.getDamage());
                             }
                         }
-
-                    }*/
+                    }
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
                 }
@@ -143,28 +152,27 @@ public class TabCrafting extends TabWithTexture {
             recipes = recipesComplete;
         } else {
             for (Object o : recipesComplete) {
-                /*if (o instanceof StationRecipe) {
-                    StationRecipe recipe = (StationRecipe) o;
-                    if (!getUses) {
-                        if (Arrays.stream(recipe.getOutputs()).anyMatch(itemInstance -> filter.itemId == itemInstance.itemId && (itemInstance.getDamage() == filter.getDamage() || itemInstance.getDamage() < 0 || !itemInstance.hasSubtypes()))) {
-                            arraylist.add(o);
-                        }
-                    } else {
-                        try {
-                            ItemStack[] aitemstack = recipe.getIngredients();
-                            for (ItemStack itemstack1 : aitemstack) {
-                                if (itemstack1 == null || filter.itemId != itemstack1.itemId || (itemstack1.hasSubtypes() && itemstack1.getDamage() != filter.getDamage()) && itemstack1.getDamage() >= 0) {
-                                    continue;
-                                }
-                                arraylist.add(o);
-                                break;
-                            }
-
-                        } catch (Exception exception) {
-                            exception.printStackTrace();
-                        }
+                ItemStack[] list = getIngredients(o);
+                ItemStack[] outputArray = getOutputs(o);
+                if (list == null || outputArray == null) continue;
+                if (!getUses) {
+                    if (Arrays.stream(outputArray).anyMatch(itemInstance -> filter.itemId == itemInstance.itemId && (itemInstance.getDamage() == filter.getDamage() || itemInstance.getDamage() < 0 || !itemInstance.hasSubtypes()))) {
+                        arraylist.add(o);
                     }
-                }*/
+                } else {
+                    try {
+                        for (ItemStack itemstack1 : list) {
+                            if (itemstack1 == null || filter.itemId != itemstack1.itemId || (itemstack1.hasSubtypes() && itemstack1.getDamage() != filter.getDamage()) && itemstack1.getDamage() >= 0) {
+                                continue;
+                            }
+                            arraylist.add(o);
+                            break;
+                        }
+
+                    } catch (Exception exception) {
+                        exception.printStackTrace();
+                    }
+                }
             }
             recipes = arraylist;
         }
@@ -367,6 +375,55 @@ public class TabCrafting extends TabWithTexture {
 
     boolean isInv(Screen screen) {
         return screen instanceof Inventory;
+    }
+
+    private static ItemStack[] getIngredients(Object recipeObj) {
+        ItemStack[] list = null;
+        if (recipeObj instanceof StationShapedRecipe recipe) {
+            list = new ItemStack[9];
+            Either<TagKey<Item>, ItemStack>[] grid = recipe.getGrid();
+            for (int h = 0; h < recipe.height; h++)
+                for (int w = 0; w < recipe.width; w++) {
+                    int localId = (h * recipe.width) + w;
+                    Either<TagKey<Item>, ItemStack> ingredient = grid[localId];
+                    if (ingredient == null) continue;
+                    int id = (h * 3) + w;
+                    list[id] = ingredient.map(tag -> new ItemStack(ItemRegistry.INSTANCE.getEntryList(tag).orElseThrow(
+                                    () -> new RuntimeException("Identifier ingredient \"" + tag.id() + "\" has no entry in the tag registry!"))
+                            .getRandom(RANDOM).orElseThrow().value()), Function.identity());
+                }
+        } else if (recipeObj instanceof ShapedRecipe recipe) {
+            list = new ItemStack[9];
+            int width = ((ShapedRecipeAccessor) recipe).getWidth();
+            int height = ((ShapedRecipeAccessor) recipe).getHeight();
+            ItemStack[] grid = ((ShapedRecipeAccessor) recipe).getInput();
+            for (int h = 0; h < height; h++)
+                for (int w = 0; w < width; w++) {
+                    int localId = (h * width) + w;
+                    ItemStack ingredient = grid[localId];
+                    if (ingredient == null) continue;
+                    int id = (h * 3) + w;
+                    list[id] = ingredient;
+                }
+        } else if (recipeObj instanceof StationShapelessRecipe recipe) {
+            Either<TagKey<Item>, ItemStack>[] ingredients = recipe.getIngredients();
+            list = new ItemStack[ingredients.length];
+            for (int i = 0, ingredientsLength = ingredients.length; i < ingredientsLength; i++)
+                list[i] = ingredients[i].map(tag -> new ItemStack(ItemRegistry.INSTANCE.getEntryList(tag).orElseThrow(
+                                () -> new RuntimeException("Identifier ingredient \"" + tag.id() + "\" has no entry in the tag registry!"))
+                        .getRandom(RANDOM).orElseThrow().value()), Function.identity());
+        } else if (recipeObj instanceof ShapelessRecipe recipe) {
+            list = ((ShapelessRecipeAccessor) recipe).getInput().toArray(new ItemStack[0]);
+        }
+        return list;
+    }
+
+    private static ItemStack[] getOutputs(Object recipeObj) {
+        ItemStack[] outputArray = null;
+        if (recipeObj instanceof CraftingRecipe recipe) {
+            outputArray = new ItemStack[] {recipe.getOutput() };
+        }
+        return outputArray;
     }
 
 }

@@ -6,6 +6,8 @@
   "mixins": [
     "access.DrawableHelperAccessor",
     "access.LevelAccessor",
+    "access.ShapedRecipeAccessor",
+    "access.ShapelessRecipeAccessor",
     "MixinItemBase"
   ],
   "server": [
