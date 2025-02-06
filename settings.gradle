@@ -2,15 +2,15 @@ pluginManagement {
     repositories {
         maven {
             name = "Fabrick"
-            url "https://maven.fabricmc.net"
+            url = "https://maven.fabricmc.net"
         }
         maven {
             name = "Babric"
-            url "https://maven.glass-launcher.net/babric"
+            url = "https://maven.glass-launcher.net/babric"
         }
         maven {
             name = "Jitpack"
-            url "https://jitpack.io/"
+            url = "https://jitpack.io/"
         }
         mavenCentral()
         gradlePluginPortal()
