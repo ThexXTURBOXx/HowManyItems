@@ -396,7 +396,7 @@ public class GuiRecipeViewer extends HandledScreen {
                         && (cursorPosY > y - 16) && (cursorPosY < y)) {
 
                     String s2 = (tabs.get(z).name());
-                    if (s2.length() > 0) {
+                    if (!s2.isEmpty()) {
                         Utils.drawTooltip(s2, cursorPosX, cursorPosY);
                     }
                     break;

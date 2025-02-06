@@ -94,7 +94,7 @@ public class Utils {
                     try {
                         int l = item.getTextureId(itemstack);
                         String s = TranslationStorage.getInstance().getClientTranslation(itemstack.getTranslationKey());
-                        if (s.length() == 0) s = itemstack.getTranslationKey() + "@" + l;
+                        if (s.isEmpty()) s = itemstack.getTranslationKey() + "@" + l;
                         if (dmg >= 4 && (s.contains(String.valueOf(dmg)) || s.contains(String.valueOf(dmg + 1)) || s.contains(String.valueOf(dmg - 1)))) {
                             break;
                         }

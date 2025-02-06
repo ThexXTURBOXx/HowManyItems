@@ -491,7 +491,7 @@ public class GuiOverlay extends Screen {
             decIndex();
         }
         else if(guibutton == buttonOptions) {
-            if(shiftHeld && HowManyItemsClient.getTabs().size() > 0) {
+            if(shiftHeld && !HowManyItemsClient.getTabs().isEmpty()) {
                 if(guiBlock == null) {
                     HowManyItemsClient.pushRecipe(screen, null, true);
                 }
@@ -601,7 +601,7 @@ public class GuiOverlay extends Screen {
     {
         if(!searchBoxFocused() && Config.config.fastSearch && !HowManyItemsClient.keyHeldLastTick) {
             if(!Utils.keyEquals(i, minecraft.options.inventoryKey) && !Utils.keyEquals(i, KeyBindings.allRecipes) && !Utils.keyEquals(i, KeyBindings.toggleOverlay)
-                    && (CharacterUtils.VALID_CHARACTERS.indexOf(c) >= 0 || (i == Keyboard.KEY_BACK && searchBox.getText().length() > 0))) {
+                    && (CharacterUtils.VALID_CHARACTERS.indexOf(c) >= 0 || (i == Keyboard.KEY_BACK && !searchBox.getText().isEmpty()))) {
                 ScreenScaler scaledresolution = new ScreenScaler(minecraft.options, minecraft.displayWidth, minecraft.displayHeight);
                 int i2 = scaledresolution.getScaledWidth();
                 int j2 = scaledresolution.getScaledHeight();
@@ -624,7 +624,7 @@ public class GuiOverlay extends Screen {
             if(searchBox.getText().length() > lastSearch.length()) {
                 prevSearches.push(currentItems);
                 currentItems = getCurrentList(currentItems);
-            }else if(searchBox.getText().length() == 0) {
+            }else if(searchBox.getText().isEmpty()) {
                 resetItems();
             }
             else if(searchBox.getText().length() < lastSearch.length()) {
@@ -645,7 +645,7 @@ public class GuiOverlay extends Screen {
                             if (screen instanceof GuiRecipeViewer) {
                                 ((GuiRecipeViewer) screen).push(null, false);
                             }
-                            else if (HowManyItemsClient.getTabs().size() > 0){
+                            else if (!HowManyItemsClient.getTabs().isEmpty()){
                                 GuiRecipeViewer newgui = new GuiRecipeViewer(null, false, screen);
                                 minecraft.currentScreen = newgui;
                                 ScreenScaler scaledresolution = new ScreenScaler(minecraft.options, minecraft.displayWidth, minecraft.displayHeight);
@@ -782,7 +782,7 @@ public class GuiOverlay extends Screen {
     private static ArrayList<ItemStack> getCurrentList(ArrayList<ItemStack> listToSearch){
         index = 0;
         ArrayList<ItemStack> newList = new ArrayList<>();
-        if(searchBox != null && searchBox.getText().length() > 0) {
+        if(searchBox != null && !searchBox.getText().isEmpty()) {
             for(ItemStack currentItem : listToSearch) {
                 String s = (TranslationStorage.getInstance().getClientTranslation(currentItem.getTranslationKey()));
                 if(s.toLowerCase().contains(searchBox.getText().toLowerCase()) && (showHiddenItems || !hiddenItems.contains(currentItem)) && (Config.config.hideNullNames || !Utils.getNiceItemName(currentItem).endsWith("null"))) {
@@ -840,7 +840,7 @@ public class GuiOverlay extends Screen {
 
     public static boolean emptySearchBox() {
         if(searchBox != null) {
-            return searchBox.getText().length() == 0;
+            return searchBox.getText().isEmpty();
         }
         return false;
     }

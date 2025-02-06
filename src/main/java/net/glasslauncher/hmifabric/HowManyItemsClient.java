@@ -170,7 +170,7 @@ public class HowManyItemsClient {
     public static void pushTabBlock(Screen gui, ItemStack item) {
         if (gui instanceof GuiRecipeViewer) {
             ((GuiRecipeViewer) gui).pushTabBlock(item);
-        } else if (!GuiOverlay.searchBoxFocused() && getTabs().size() > 0) {
+        } else if (!GuiOverlay.searchBoxFocused() && !getTabs().isEmpty()) {
             Utils.getMC().lockMouse();
             GuiRecipeViewer newgui = new GuiRecipeViewer(item, gui);
             Utils.getMC().currentScreen = newgui;
