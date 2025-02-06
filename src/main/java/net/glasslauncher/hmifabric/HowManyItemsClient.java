@@ -8,6 +8,7 @@ import net.glasslauncher.hmifabric.tabs.Tab;
 import net.glasslauncher.hmifabric.tabs.TabCrafting;
 import net.glasslauncher.hmifabric.tabs.TabRegistry;
 import net.glasslauncher.hmifabric.tabs.TabSmelting;
+import net.mine_diver.unsafeevents.event.PhaseOrdering;
 import net.mine_diver.unsafeevents.listener.EventListener;
 import net.mine_diver.unsafeevents.listener.ListenerPriority;
 import net.minecraft.block.Block;
@@ -20,6 +21,7 @@ import net.modificationstation.stationapi.api.StationAPI;
 import net.modificationstation.stationapi.api.client.event.gui.screen.container.TooltipRenderEvent;
 import net.modificationstation.stationapi.api.client.event.network.MultiplayerLogoutEvent;
 import net.modificationstation.stationapi.api.client.event.option.KeyBindingRegisterEvent;
+import net.modificationstation.stationapi.api.event.init.InitFinishedEvent;
 import net.modificationstation.stationapi.api.event.registry.MessageListenerRegistryEvent;
 import net.modificationstation.stationapi.api.mod.entrypoint.Entrypoint;
 import net.modificationstation.stationapi.api.registry.Registry;
@@ -240,7 +242,15 @@ public class HowManyItemsClient {
         event.registry.addEquivalentCraftingStation(Identifier.of(Namespace.MINECRAFT, "smelting"), new ItemStack(Block.LIT_FURNACE));
     }
 
-    @EventListener(phase = StationAPI.INTERNAL_PHASE, priority = ListenerPriority.HIGHEST)
+    public static final String HMI_TOOLTIP_PHASE = "hmifabric:tooltip_phase";
+
+    @EventListener(priority = ListenerPriority.LOW)
+    public static void initAMI(InitFinishedEvent e) {
+        //noinspection UnstableApiUsage
+        PhaseOrdering.of(TooltipRenderEvent.class).addPhaseOrdering(HMI_TOOLTIP_PHASE, StationAPI.INTERNAL_PHASE);
+    }
+
+    @EventListener(phase = HMI_TOOLTIP_PHASE)
     public void disableVanillaTooltips(TooltipRenderEvent e) {
         if (e.container != null) {
             e.setCanceled(true);
